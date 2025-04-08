@@ -1,66 +1,104 @@
-## Foundry
+## BuyBackAndBurn Contract on Arbitrum
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**This smart contract automates the Buyback and Burn mechanism using Uniswap V3 on the Arbitrum blockchain.**  
+When users make payments in USDT, a portion is used to buy a specified token on Uniswap, which is then burned, reducing its total supply. The remaining amount is transferred to the intended recipient.
 
-Foundry consists of:
+---
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Features
 
-## Documentation
+- **🔁 Buyback:** Uses Uniswap V3 to swap USDT to the target token.
+- **🔥 Burn Mechanism:** Burns 5% of every payment in the target token.
+- **📤 Payment Forwarding:** Sends the remaining 95% to the recipient.
+- **💼 Mainnet-Ready:** Deployable and tested on Arbitrum One.
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+## Technologies Used
 
-### Build
+- **Solidity** `0.8.20`
+- [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts)
+- [Uniswap V3 Periphery](https://github.com/Uniswap/v3-periphery)
+- **Foundry** for testing
 
-```shell
-$ forge build
+---
+
+## Contract Overview
+
+```solidity
+address public constant USDT = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
+address public constant tokenToBurn = 0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684;
 ```
 
-### Test
+- **BURNPERCENTAGE:** 5% (denoted as 50000 PPM)
+- **Swap Path:** USDT → tokenToBurn
+- **Router Address:** `0xE592427A0AEce92De3Edee1F18E0157C05861564` (Uniswap V3 Swap Router)
 
-```shell
-$ forge test
+---
+
+## Functionality
+
+### `sendPayment(address receiveAddress, uint256 amount)`
+
+- Accepts USDT from the user.
+- Swaps 5% of it for `tokenToBurn` via Uniswap.
+- Burns the purchased `tokenToBurn` tokens.
+- Sends the remaining 95% to the recipient.
+
+---
+
+## Test Case (Using Foundry)
+
+The test simulates a scenario where:
+- A user sends 1000 USDT.
+- 950 USDT is transferred to the recipient.
+- 50 USDT is used to buy and burn the target token.
+
+```solidity
+function testBuyBackAndBurn() public {
+    ...
+    defaultPaymentContract.sendPayment(receiveAddress, amount);
+    ...
+    assertLe(IERC20(tokenToBurnAddress).totalSupply(), supplyBefore);
+    assertEq(IERC20(usdtAddress).balanceOf(receiveAddress), amountToRecieve);
+}
 ```
 
-### Format
+---
 
-```shell
-$ forge fmt
+## Installation & Testing
+
+```bash
+git clone https://github.com/your-username/buyback-and-burn-arbitrum.git
+cd buyback-and-burn-arbitrum
+forge install
+forge test
 ```
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
-```
+## Deployment (Arbitrum One)
 
-### Anvil
+Make sure you verify the following addresses before deploying:
 
-```shell
-$ anvil
-```
+| Component            | Address                                               |
+|----------------------|--------------------------------------------------------|
+| **Uniswap V3 Router** | `0xE592427A0AEce92De3Edee1F18E0157C05861564`           |
+| **USDT (Arbitrum)**   | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`           |
+| **Token to Burn**     | `0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684` (example) |
 
-### Deploy
+---
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+## License
 
-### Cast
+This project is licensed under the [MIT License](./LICENSE).
 
-```shell
-$ cast <subcommand>
-```
+---
 
-### Help
+## Author
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+**Saif**  
+Feel free to reach out or contribute! PRs are welcome.
+
+---
+
