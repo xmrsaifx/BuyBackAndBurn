@@ -97,7 +97,7 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Author
 
-**Saif**  
+**xmrsaifx**  
 Feel free to reach out or contribute! PRs are welcome.
 
 ---
